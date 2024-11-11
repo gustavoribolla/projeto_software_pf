@@ -13,7 +13,7 @@ import java.util.Map;
 @Component
 public class TokenValidator {
 
-    @Value("${token.validation.url}")
+    @Value("${token.validation.url:184.72.80.215}")
     private String tokenValidationUrl;
 
     public boolean validateToken(String token, String... allowedRoles) {
