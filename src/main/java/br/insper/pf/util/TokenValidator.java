@@ -1,5 +1,6 @@
 package br.insper.pf.util;
 
+import br.insper.pf.exception.AccessDeniedException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -17,8 +18,18 @@ public class TokenValidator {
     private String tokenValidationUrl;
 
     public boolean validateToken(String token, String... allowedRoles) {
+        String role = validateTokenAndGetRole(token);
+        for (String allowedRole : allowedRoles) {
+            if (allowedRole.equals(role)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public String validateTokenAndGetRole(String token) {
         if (token == null || !token.startsWith("Bearer ")) {
-            return false;
+            throw new AccessDeniedException("Invalid token");
         }
         token = token.substring(7);
 
@@ -31,13 +42,8 @@ public class TokenValidator {
 
         if (response.getStatusCode().is2xxSuccessful()) {
             Map<String, Object> responseBody = response.getBody();
-            String role = (String) responseBody.get("role");
-            for (String allowedRole : allowedRoles) {
-                if (allowedRole.equals(role)) {
-                    return true;
-                }
-            }
+            return (String) responseBody.get("papel");
         }
-        return false;
+        throw new AccessDeniedException("Invalid token");
     }
 }
